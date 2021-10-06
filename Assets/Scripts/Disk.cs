@@ -1,0 +1,116 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Disk : MonoBehaviour
+{
+    [SerializeField] private GameSettings settings;
+    [SerializeField] private AnimationCurve flipAnimation;
+    [SerializeField] private AnimationCurve placementAnimation;
+    [SerializeField] private float verticalPlacementOffset;
+    private Vector3 placementOffset;
+
+    //true = black, false = white
+    private bool color = true;
+
+    //Rotation Animation
+    private int flipCounter = 0;
+    private bool animationIsPlaying = false;
+
+    private Vector3 targetBoardPlacement;
+
+    void Start(){
+        placementOffset = new Vector3(0, verticalPlacementOffset, 0);
+    }
+
+    [ContextMenu("Flip")]
+    public void Flip(){
+        color = !color;
+
+        flipCounter++;
+        if(!animationIsPlaying)
+            StartCoroutine(FlipAnimation());
+    }
+
+    public void Place(Vector2Int boardCoordinates, bool color){
+        this.color = color;
+        RotateToCorrectSide();
+
+        float cellSize = settings.GetCellSize();
+        targetBoardPlacement = new Vector3(boardCoordinates.x * cellSize, 0, boardCoordinates.y * cellSize);
+
+        StartCoroutine(PlaceAnimation());
+    }
+
+    private void RotateToCorrectSide(){
+        transform.rotation = Quaternion.Euler(new Vector3(color ? 0 : 180, 0,0));
+    }
+
+    private void Update() {
+        if(Input.GetKeyDown(KeyCode.Space))
+            Flip();
+    }
+
+    public bool GetColor(){
+        return color;
+    }
+
+    private IEnumerator FlipAnimation(){
+        animationIsPlaying = true;
+        while(flipCounter > 0){
+            //Move up
+            float timer = 0.0f;
+            float animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time;
+            Vector3 flipPosition = transform.position + placementOffset;
+            Vector3 sourcePosition = transform.position;
+            while(timer < animationDuration){
+                float t = timer/animationDuration;
+                t = placementAnimation.Evaluate(t);
+                transform.position = Vector3.Lerp(sourcePosition, flipPosition, t);
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            //Flip
+            float startRotationAngle = transform.localEulerAngles.y;
+            timer = 0.0f;
+            animationDuration = flipAnimation.keys[flipAnimation.keys.Length-1].time;
+            while(timer < animationDuration){
+                float t = timer/animationDuration;
+                transform.rotation = Quaternion.Euler(flipAnimation.Evaluate(t)*179 + startRotationAngle, 0, 0);
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            //Move down
+            timer = 0.0f;
+            animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time;
+            while(timer < animationDuration){
+                float t = timer/animationDuration;
+                t = placementAnimation.Evaluate(t);
+                transform.position = Vector3.Lerp(flipPosition, sourcePosition, t);
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            flipCounter--;
+        }
+        RotateToCorrectSide();
+        animationIsPlaying = false;
+    }
+
+    private IEnumerator PlaceAnimation(){
+        float timer = 0.0f;
+        float animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time;
+
+        Vector3 sourcePosition = transform.position;
+        Vector3 targetPosition = targetBoardPlacement;
+        while(timer < animationDuration){
+            float t = timer/animationDuration;
+            t = placementAnimation.Evaluate(t);
+            transform.position = Vector3.Lerp(sourcePosition, targetPosition, t);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+    }
+}
