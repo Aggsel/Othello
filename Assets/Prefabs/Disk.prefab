@@ -83,7 +83,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.5
+      time: 0.7
       value: 1
       inSlope: 0
       outSlope: 0
@@ -95,9 +95,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   verticalPlacementOffset: 3
-  placement: {x: 0, y: 0}
-  flipToBlack: {fileID: 0}
-  flipToWhite: {fileID: 0}
 --- !u!23 &2597330284641782189
 MeshRenderer:
   m_ObjectHideFlags: 0

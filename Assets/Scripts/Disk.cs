@@ -61,12 +61,11 @@ public class Disk : MonoBehaviour
             //Move up
             float timer = 0.0f;
             float animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time;
-            Vector3 flipPosition = transform.position + placementOffset;
-            Vector3 sourcePosition = transform.position;
+            Vector3 flipPosition = targetBoardPlacement + placementOffset;
             while(timer < animationDuration){
                 float t = timer/animationDuration;
                 t = placementAnimation.Evaluate(t);
-                transform.position = Vector3.Lerp(sourcePosition, flipPosition, t);
+                transform.position = Vector3.Lerp(targetBoardPlacement, flipPosition, t);
                 timer += Time.deltaTime;
                 yield return null;
             }
@@ -88,7 +87,7 @@ public class Disk : MonoBehaviour
             while(timer < animationDuration){
                 float t = timer/animationDuration;
                 t = placementAnimation.Evaluate(t);
-                transform.position = Vector3.Lerp(flipPosition, sourcePosition, t);
+                transform.position = Vector3.Lerp(flipPosition, targetBoardPlacement, t);
                 timer += Time.deltaTime;
                 yield return null;
             }
@@ -104,11 +103,10 @@ public class Disk : MonoBehaviour
         float animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time;
 
         Vector3 sourcePosition = transform.position;
-        Vector3 targetPosition = targetBoardPlacement;
         while(timer < animationDuration){
             float t = timer/animationDuration;
             t = placementAnimation.Evaluate(t);
-            transform.position = Vector3.Lerp(sourcePosition, targetPosition, t);
+            transform.position = Vector3.Lerp(sourcePosition, targetBoardPlacement, t);
             timer += Time.deltaTime;
             yield return null;
         }

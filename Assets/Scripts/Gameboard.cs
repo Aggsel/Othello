@@ -23,11 +23,21 @@ public class Gameboard : MonoBehaviour
     private Camera mainCamera;
     private Disk[,] board;
 
+    private readonly Vector2Int[] directions = new Vector2Int[]{
+        new Vector2Int(0, 1),
+        new Vector2Int(1, 1),
+        new Vector2Int(1, 0),
+        new Vector2Int(1, -1),
+        new Vector2Int(0, -1),
+        new Vector2Int(-1, -1),
+        new Vector2Int(-1, 0),
+        new Vector2Int(-1, 1),
+    };
+
     [SerializeField] private DiscPosition[] initialPositions;
 
-    //DEBUGGING!
-    [SerializeField] private Vector2Int placement;
-    [SerializeField] private bool color;
+    //DEBUG
+    [SerializeField] private GameObject validMoveIndicator;
 
     void Start(){
         CheckSerializedReferences();
@@ -39,6 +49,89 @@ public class Gameboard : MonoBehaviour
         mainCamera = Camera.main;
 
         StartCoroutine(PlaceInitialDisks());
+    }
+
+    void Update() {
+        UpdateIndicatorPosition();
+
+        Vector2Int index;
+        //Place black if right mouse button, otherwise place white. If disk is already in that spot, flip it.
+        if(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)){
+            if(GetBoardIndexFromMousePosition(out index)){
+                if(!TryAddNewDisk(index, Input.GetMouseButtonDown(1))){
+                    if(IsWithinBoard(index))
+                    board[index.x, index.y].Flip();
+                }
+            }
+        }
+
+        if(Input.GetMouseButtonDown(2)){
+            if(GetBoardIndexFromMousePosition(out index))
+                if(IsWithinBoard(index) && board[index.x, index.y] != null){
+                    Destroy(board[index.x, index.y].gameObject);
+                    board[index.x, index.y] = null; 
+                }
+        }
+    }
+
+    private void UpdateIndicatorPosition(){
+        Vector2Int index;
+        if(GetBoardIndexFromMousePosition(out index))
+            if(IsWithinBoard(index)){
+                if(!placementIndicator.activeInHierarchy)
+                    placementIndicator.SetActive(true);
+                placementIndicator.transform.position = new Vector3(index.x * cellSize, 0, index.y * cellSize);
+            }
+            else
+                placementIndicator.SetActive(false);
+    }
+    
+
+    private List<Vector2Int> GetLegalMoves(bool color){
+        List<Vector2Int> legalMoves = new List<Vector2Int>(); 
+        for (int y = 0; y < boardSize; y++){
+            for (int x = 0; x < boardSize; x++){
+                if(board[x,y] != null)  //cell already contains disk.
+                    continue;
+
+                Vector2Int currentPos = new Vector2Int(x,y);
+                for (int i = 0; i < directions.Length; i++){
+                    Vector2Int previousPos = currentPos - directions[i];
+                    if(EvaluateDirection(currentPos, previousPos, color, 0)){
+                        legalMoves.Add(currentPos);
+                        break;  //this is already a valid move, no need to check the other directions.
+                    }
+                }
+            }
+        }
+        return legalMoves;
+    }
+
+
+    private bool EvaluateDirection(Vector2Int currentPos, Vector2Int previousPos, bool originalColor, int depth){
+        Vector2Int nextPos = currentPos + (currentPos - previousPos); //new Vector2Int(0, -1);
+        if(!IsWithinBoard(nextPos)){
+            Debug.Log($"{nextPos} is not within board. Current: {currentPos}, Previous: {previousPos}, Next: {nextPos}");
+            return false;
+        }
+        
+        if(board[nextPos.x, nextPos.y] == null){
+            Debug.Log("Reached a dead end.");
+            return false;
+        }
+
+        if(board[nextPos.x, nextPos.y].GetColor() == originalColor && depth >= 1){
+            Debug.Log("Color was same and depth was more than or equal 1!");
+            return true;
+        }
+
+        if(board[nextPos.x, nextPos.y].GetColor() == originalColor && depth == 0){
+            Debug.Log("Color was same and depth was more 0");
+            return false;
+        }
+
+        Debug.Log("Going down");
+        return EvaluateDirection(nextPos, currentPos, originalColor, depth + 1);
     }
 
     /// <summary>
@@ -72,28 +165,10 @@ public class Gameboard : MonoBehaviour
     }
 
     private IEnumerator PlaceInitialDisks(){
-        yield return new WaitForSeconds(0.5f);
+        // yield return new WaitForSeconds(0.5f);
         for (int i = 0; i < initialPositions.Length; i++){
             TryAddNewDisk(initialPositions[i].position, initialPositions[i].color);
-            yield return new WaitForSeconds(0.2f);
-        }
-    }
-
-    void Update() {
-        Vector2Int index;
-        if(GetBoardIndexFromMousePosition(out index))
-            placementIndicator.transform.position = new Vector3(index.x * cellSize, 0, index.y * cellSize);
-
-        if(Input.GetMouseButtonDown(0)){
-            if(GetBoardIndexFromMousePosition(out index)){
-                TryAddNewDisk(index, this.color);
-            }
-        }
-
-        if(Input.GetMouseButtonDown(1)){
-            if(GetBoardIndexFromMousePosition(out index)){
-                TryAddNewDisk(index, !this.color);
-            }
+            yield return new WaitForSeconds(0.01f);
         }
     }
 
@@ -109,11 +184,6 @@ public class Gameboard : MonoBehaviour
         Vector3 point = ray.GetPoint(distance)/cellSize;
         position = new Vector2Int(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point.z));
         return true;
-    }
-
-    [ContextMenu("Add new disk")]
-    private void AddDisk(){
-        TryAddNewDisk(this.placement, this.color);
     }
 
     /// <summary>
@@ -140,5 +210,16 @@ public class Gameboard : MonoBehaviour
         if(position.x >= boardSize || position.x < 0 || position.y >= boardSize || position.y < 0)
             return false;
         return true;
+    }
+
+    void OnDrawGizmos(){
+        if(board != null){
+            for (int y = 0; y < boardSize; y++){
+                for (int x = 0; x < boardSize; x++){
+                if(board[x,y] != null)
+                    Gizmos.DrawSphere(new Vector3(x * cellSize, 0, y * cellSize), 0.4f);
+                }
+            }
+        }
     }
 }
