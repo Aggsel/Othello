@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: GameSettings
   m_EditorClassIdentifier: 
   boardSize: 8
-  cellSize: {x: 2, y: 2}
+  cellSize: 2
