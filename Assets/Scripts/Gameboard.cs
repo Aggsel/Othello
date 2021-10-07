@@ -24,7 +24,7 @@ public class Gameboard : MonoBehaviour
     private Disk[,] disks;
     private Board board;
 
-    private bool currentPlayer = false;
+    private bool currentPlayer = true;
     private readonly bool playerColor = false;
     private readonly bool opponentColor = true;
 
@@ -60,7 +60,8 @@ public class Gameboard : MonoBehaviour
 
         if(Input.GetMouseButtonDown(0) && currentPlayer == playerColor){
             if(GetBoardIndexFromMousePosition(out index)){
-                if(TryPlaceDisk(index, playerColor)){
+                Move move;
+                if(TryPlaceDisk(index, playerColor, out move)){
                     NextPlayer();
                 }
             }
@@ -79,10 +80,16 @@ public class Gameboard : MonoBehaviour
         }
 
         if(currentPlayer == opponentColor){
-            List<Vector2Int> legalMoves = board.GetLegalMoves(currentPlayer);
-            TryPlaceDisk(legalMoves[Random.Range(0, legalMoves.Count)], currentPlayer);
-            NextPlayer();
+            StartCoroutine(PlayAsOpponent());
         }
+    }
+
+    private IEnumerator PlayAsOpponent(){
+        yield return new WaitForSeconds(1.0f);
+        List<Move> legalMoves = board.GetLegalMoves(currentPlayer);
+        Move move;
+        TryPlaceDisk(legalMoves[Random.Range(0, legalMoves.Count)].position, currentPlayer, out move);
+        NextPlayer();
     }
 
     private void UpdateIndicatorPosition(){
@@ -130,9 +137,11 @@ public class Gameboard : MonoBehaviour
     private IEnumerator PlaceInitialDisks(){
         // yield return new WaitForSeconds(0.5f);
         for (int i = 0; i < initialPositions.Length; i++){
-            TryPlaceDisk(initialPositions[i].position, initialPositions[i].color, true);
+            Move move;
+            TryPlaceDisk(initialPositions[i].position, initialPositions[i].color, out move, true);
             yield return new WaitForSeconds(0.01f);
         }
+        NextPlayer();
     }
 
     /// <summary>
@@ -161,8 +170,8 @@ public class Gameboard : MonoBehaviour
     /// <param name="color">What color the new disk should be. True = black, False = white</param>
     /// <param name="force">Should this disk be placed regardless of the rules?</param>
     /// <returns>True if the new disk was successfully placed.</returns>
-    private bool TryPlaceDisk(Vector2Int position, bool color, bool force = false){
-        if(!board.TryPlaceDisk(position, color, force))
+    private bool TryPlaceDisk(Vector2Int position, bool color, out Move move, bool force = false){
+        if(!board.TryPlaceDisk(position, color, out move, force))
             return false;
 
         Vector3 spawnPoint = color ? blackSpawnPoint.position : whiteSpawnPoint.position;
@@ -170,7 +179,16 @@ public class Gameboard : MonoBehaviour
         newDisk.Place(position, color);
         disks[position.x, position.y] = newDisk;
 
+        if(!force)
+            FlipAllDisksFromMove(move);
+
         return true;
+    }
+
+    private void FlipAllDisksFromMove(Move move){
+        for (int i = 0; i < move.flips.Count; i++){
+            TryFlipDisk(move.flips[i]);
+        }
     }
 
     private bool TryFlipDisk(Vector2Int position){
