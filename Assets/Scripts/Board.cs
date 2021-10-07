@@ -97,6 +97,24 @@ public class Board{
         return legalMoves;
     }
 
+    public void Search(Vector2Int position, bool color, int maxDepth, int currentDepth = 0){
+        if(currentDepth > maxDepth)
+            return;
+
+        List<Move> legalMoves = this.GetLegalMoves(color);
+        Move bestMove = new Move();
+        for (int i = 0; i < legalMoves.Count; i++){
+            Board newBoard = new Board(this.boardSize, this.board);
+            Move move;
+            if(newBoard.TryPlaceDisk(legalMoves[i].position, color, out move)){
+                if(move.flips.Count > bestMove.flips.Count){
+                    bestMove = move;
+                    newBoard.Search(move.position, !color, maxDepth, currentDepth + 1);
+                }
+            }
+        }
+    }
+
     public bool IsLegalMove(Vector2Int position, bool color, ref Move move){
         bool isLegal = false;
         Move tempMove = new Move();

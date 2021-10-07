@@ -95,6 +95,7 @@ public class Disk : MonoBehaviour
             flipCounter--;
         }
         RotateToCorrectSide();
+        transform.position = targetBoardPlacement;
         animationIsPlaying = false;
     }
 

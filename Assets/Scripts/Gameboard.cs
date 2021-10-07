@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 [System.Serializable]
 public struct DiscPosition{
@@ -32,6 +33,8 @@ public class Gameboard : MonoBehaviour
 
     //DEBUG
     [SerializeField] private GameObject validMoveIndicator;
+    [SerializeField] private GameObject boardTextPrefab;
+    private List<GameObject> helpTexts = new List<GameObject>();
 
     void Start(){
         CheckSerializedReferences();
@@ -76,10 +79,11 @@ public class Gameboard : MonoBehaviour
     private void NextPlayer(){
         currentPlayer = !currentPlayer;
         if(currentPlayer == playerColor){
-
+            PlaceHelpTexts(board.GetLegalMoves(currentPlayer));
         }
 
         if(currentPlayer == opponentColor){
+            ClearHelpTexts();
             StartCoroutine(PlayAsOpponent());
         }
     }
@@ -88,7 +92,23 @@ public class Gameboard : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         List<Move> legalMoves = board.GetLegalMoves(currentPlayer);
         Move move;
-        TryPlaceDisk(legalMoves[Random.Range(0, legalMoves.Count)].position, currentPlayer, out move);
+
+        //Play only if possible.
+        if(legalMoves.Count > 0){
+            int bestCurrentMoveIndex = 0;
+            int bestCurrentMove = -1;
+            for (int i = 0; i < legalMoves.Count; i++){
+                int flips = legalMoves[i].flips.Count;
+                if(flips > bestCurrentMove){
+                    bestCurrentMove = flips;
+                    bestCurrentMoveIndex = i;
+                }
+            }
+
+            if(bestCurrentMove != -1){
+                TryPlaceDisk(legalMoves[bestCurrentMoveIndex].position, currentPlayer, out move);
+            }
+        }
         NextPlayer();
     }
 
@@ -183,6 +203,23 @@ public class Gameboard : MonoBehaviour
             FlipAllDisksFromMove(move);
 
         return true;
+    }
+
+    private void PlaceHelpTexts(List<Move> legalMoves){
+        if(legalMoves.Count > 0){
+            for (int i = 0; i < legalMoves.Count; i++){
+                int flips = legalMoves[i].flips.Count;
+                GameObject newText = Instantiate(boardTextPrefab, new Vector3(legalMoves[i].position.x * cellSize, 0.5f, legalMoves[i].position.y * cellSize), boardTextPrefab.transform.rotation);
+                newText.GetComponent<TextMeshPro>().text = flips.ToString();
+                helpTexts.Add(newText);
+            }
+        }
+    }
+
+    private void ClearHelpTexts(){
+        for (int i = 0; i < helpTexts.Count; i++){
+            Destroy(helpTexts[i]);
+        }
     }
 
     private void FlipAllDisksFromMove(Move move){
