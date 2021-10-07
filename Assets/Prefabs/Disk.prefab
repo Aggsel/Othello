@@ -60,8 +60,8 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.29999998
-      value: 0.99575114
+      time: 0.5
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -84,7 +84,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.39999998
+      time: 0.6
       value: 1
       inSlope: 0
       outSlope: 0
@@ -95,7 +95,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  verticalPlacementOffset: 3
+  verticalPlacementOffset: 1
 --- !u!23 &2597330284641782189
 MeshRenderer:
   m_ObjectHideFlags: 0
