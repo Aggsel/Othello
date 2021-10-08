@@ -8,8 +8,20 @@ public class PlacementIndicator : MonoBehaviour
 
     [SerializeField] private Gameboard gameboard;
     [SerializeField] private GameSettings settings;
-    [SerializeField] private MeshRenderer meshRenderer;
+
+    private MeshRenderer meshRenderer;
     private float cellSize;
+
+    void OnDisable(){
+        meshRenderer.enabled = false;
+    }
+
+    void OnEnable(){
+        if(meshRenderer == null)
+            meshRenderer = GetComponent<MeshRenderer>();
+            
+        meshRenderer.enabled = true;
+    }
 
     void Start(){
         gameboard = FindObjectOfType<Gameboard>();
@@ -19,8 +31,6 @@ public class PlacementIndicator : MonoBehaviour
             this.enabled = false;
         }
         cellSize = settings.GetCellSize();
-
-        meshRenderer = GetComponent<MeshRenderer>();
     }
 
     void Update(){

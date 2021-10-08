@@ -11,38 +11,36 @@ public struct DiscPosition{
 
 public class Gameboard : MonoBehaviour
 {
-    [SerializeField] private GameSettings settings;
-    [SerializeField] private GameObject diskPrefab;
     int boardSize = 0;
     float cellSize = 0.0f;
-
-    [SerializeField] private Transform blackSpawnPoint;
-    [SerializeField] private Transform whiteSpawnPoint;
-
-    [SerializeField] private GameObject placementIndicator;
-
     private Camera mainCamera;
     private Disk[,] disks;
     private Board board;
-
     private bool currentPlayer = true;
     private bool isPlayersTurn = false;
-
-    [SerializeField] private DiscPosition[] initialPositions;
-
-    //DEBUG
-    [SerializeField] private GameObject validMoveIndicator;
-    [SerializeField] private GameObject boardTextPrefab;
+    private GameObject disksParent;
+    private GameObject boardTextParent;
     private List<GameObject> helpTexts = new List<GameObject>();
+    private UIController uiController;
 
-    [SerializeField] private TextMeshPro whiteScoreText;
-    [SerializeField] private TextMeshPro blackScoreText;
+    [Header("Game Settings")]
+    [SerializeField] private DiscPosition[] initialPositions;
+    [SerializeField] private GameSettings settings;
 
+    [Header("Enemy AI References")]
     [SerializeField] private BaseOpponent mainOpponent;
     [SerializeField] private BaseOpponent secondaryOpponent;
 
-    private GameObject disksParent;
-    private GameObject boardTextParent;
+    [Header("Game Object References")]
+    [SerializeField] private Transform blackSpawnPoint;
+    [SerializeField] private Transform whiteSpawnPoint;
+
+    [Tooltip("Reference to a object with a 'PlacementIndicator' component.")]
+    [SerializeField] private GameObject placementIndicator;
+
+    [Header("Asset References")]
+    [SerializeField] private GameObject boardTextPrefab;
+    [SerializeField] private GameObject diskPrefab;
 
     void Start(){
         CheckSerializedReferences();
@@ -57,6 +55,8 @@ public class Gameboard : MonoBehaviour
         disksParent.transform.SetParent(transform);
         boardTextParent = new GameObject("Board Texts");
         boardTextParent.transform.SetParent(transform);
+
+        uiController = UIController.Instance;
 
         PlaceInitialDisks();
     }
@@ -90,7 +90,7 @@ public class Gameboard : MonoBehaviour
             return;
         }
 
-        if(mainOpponent != null)
+        if(currentPlayer && mainOpponent != null)
             StartCoroutine(PlayAsOpponent(mainOpponent));
         else
             StartCoroutine(PlayAsOpponent(secondaryOpponent));
@@ -261,7 +261,7 @@ public class Gameboard : MonoBehaviour
     private void UpdateScoreText(){
         int white, black;
         board.GetScore(out white, out black);
-        whiteScoreText.text = white.ToString();
-        blackScoreText.text = black.ToString();
+        uiController.SetScore(true, black);
+        uiController.SetScore(false, white);
     }
 }
