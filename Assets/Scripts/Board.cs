@@ -48,6 +48,21 @@ public class Board{
         this.boardSize = size;
     }
 
+    public void GetScore(out int white, out int black){
+        black = 0;
+        white = 0;
+        for (int y = 0; y < boardSize; y++){
+            for (int x = 0; x < boardSize; x++){
+                if(board[x,y].isPlaced){
+                    if(board[x,y].color)
+                        black++;
+                    else
+                        white++;
+                }
+            }
+        }
+    }
+
     public bool TryPlaceDisk(Vector2Int position, bool color, out Move move, bool force = false){
         move = new Move();
         if(!IsWithinBoard(position))
