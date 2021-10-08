@@ -41,6 +41,9 @@ public class Gameboard : MonoBehaviour
     [SerializeField] private BaseOpponent mainOpponent;
     [SerializeField] private BaseOpponent secondaryOpponent;
 
+    private GameObject disksParent;
+    private GameObject boardTextParent;
+
     void Start(){
         CheckSerializedReferences();
 
@@ -49,6 +52,11 @@ public class Gameboard : MonoBehaviour
         disks = new Disk[boardSize,boardSize];
         board = new Board(boardSize);
         mainCamera = Camera.main;
+
+        disksParent = new GameObject("Disks");
+        disksParent.transform.SetParent(transform);
+        boardTextParent = new GameObject("Board Texts");
+        boardTextParent.transform.SetParent(transform);
 
         PlaceInitialDisks();
     }
@@ -61,8 +69,6 @@ public class Gameboard : MonoBehaviour
     }
 
     void Update() {
-        UpdateIndicatorPosition();
-
         Vector2Int index;
         if(Input.GetMouseButtonDown(0) && IsPlayersTurn()){
             if(GetBoardIndexFromMousePosition(out index)){
@@ -79,27 +85,26 @@ public class Gameboard : MonoBehaviour
         UpdateScoreText();
         currentPlayer = !currentPlayer;
         
-        if(currentPlayer){      //Secondary opponent or player (white)
-            if(mainOpponent != null)
-                StartCoroutine(PlayAsOpponent(mainOpponent));
-            else
-                OnPlayerTurnStart();
+        if(IsPlayersTurn()){
+            OnPlayerTurnStart();
+            return;
         }
-        else{                   //Main opponent or player (black)
-            if(secondaryOpponent != null)
-                StartCoroutine(PlayAsOpponent(secondaryOpponent));
-            else
-                OnPlayerTurnStart();
-        }
+
+        if(mainOpponent != null)
+            StartCoroutine(PlayAsOpponent(mainOpponent));
+        else
+            StartCoroutine(PlayAsOpponent(secondaryOpponent));
     }
 
     private void OnPlayerTurnStart(){
         PlaceHelpTexts(board.GetLegalMoves(currentPlayer));
+        placementIndicator.SetActive(true);
         isPlayersTurn = true;
     }
 
     private void OnPlayerTurnEnd(){
         ClearHelpTexts();
+        placementIndicator.SetActive(false);
         isPlayersTurn = false;
     }
 
@@ -122,18 +127,6 @@ public class Gameboard : MonoBehaviour
 
         yield return new WaitForSeconds(1.0f);
         NextPlayer();
-    }
-
-    private void UpdateIndicatorPosition(){
-        Vector2Int index;
-        if(GetBoardIndexFromMousePosition(out index))
-            if(IsWithinBoard(index)){
-                if(!placementIndicator.activeInHierarchy)
-                    placementIndicator.SetActive(true);
-                placementIndicator.transform.position = new Vector3(index.x * cellSize, 0, index.y * cellSize);
-            }
-            else
-                placementIndicator.SetActive(false);
     }
 
     /// <summary>
@@ -183,7 +176,7 @@ public class Gameboard : MonoBehaviour
     /// </summary>
     /// <param name="position"></param>
     /// <returns>True if mouse was over a cell on the board.</returns>
-    private bool GetBoardIndexFromMousePosition(out Vector2Int position){
+    public bool GetBoardIndexFromMousePosition(out Vector2Int position){
         Ray ray = mainCamera.ViewportPointToRay(mainCamera.ScreenToViewportPoint(Input.mousePosition));
         Plane boardPlane = new Plane(transform.up, transform.position);
         float distance;
@@ -209,7 +202,7 @@ public class Gameboard : MonoBehaviour
             return false;
 
         Vector3 spawnPoint = color ? blackSpawnPoint.position : whiteSpawnPoint.position;
-        Disk newDisk = Instantiate(diskPrefab, spawnPoint, Quaternion.identity).GetComponent<Disk>();
+        Disk newDisk = Instantiate(diskPrefab, spawnPoint, Quaternion.identity, disksParent.transform).GetComponent<Disk>();
         newDisk.Place(position, color);
         disks[position.x, position.y] = newDisk;
 
@@ -223,7 +216,9 @@ public class Gameboard : MonoBehaviour
         if(legalMoves.Count > 0){
             for (int i = 0; i < legalMoves.Count; i++){
                 int flips = legalMoves[i].flips.Count;
-                GameObject newText = Instantiate(boardTextPrefab, new Vector3(legalMoves[i].position.x * cellSize, 0.1f, legalMoves[i].position.y * cellSize), boardTextPrefab.transform.rotation);
+                GameObject newText = Instantiate(   boardTextPrefab, new Vector3(legalMoves[i].position.x * cellSize, 0.1f, legalMoves[i].position.y * cellSize), 
+                                                    boardTextPrefab.transform.rotation, boardTextParent.transform);
+
                 newText.GetComponent<TextMeshPro>().text = flips.ToString();
                 helpTexts.Add(newText);
             }
@@ -257,7 +252,7 @@ public class Gameboard : MonoBehaviour
         disks[position.x, position.y] = null;
     }
 
-    private bool IsWithinBoard(Vector2Int position){
+    public bool IsWithinBoard(Vector2Int position){
         if(position.x >= boardSize || position.x < 0 || position.y >= boardSize || position.y < 0)
             return false;
         return true;
