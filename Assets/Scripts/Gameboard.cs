@@ -22,12 +22,20 @@ public class Gameboard : MonoBehaviour
     private GameObject boardTextParent;
     private List<GameObject> helpTexts = new List<GameObject>();
     private UIController uiController;
+    private int turnsWithoutLegalMove = 0;
+
+    private int whiteWins = 0;
+    private int blackWins = 0;
 
     [Header("Game Settings")]
     [SerializeField] private DiscPosition[] initialPositions;
     [SerializeField] private GameSettings settings;
+    [SerializeField] private float aiTimeBetweenTurns;
+    [SerializeField] private string whiteWinningText;
+    [SerializeField] private string blackWinningText;
+    [SerializeField] private string tieWinningText;
 
-    [Header("Enemy AI References")]
+    [Header("Opponent AI References")]
     [SerializeField] private BaseOpponent mainOpponent;
     [SerializeField] private BaseOpponent secondaryOpponent;
 
@@ -45,11 +53,11 @@ public class Gameboard : MonoBehaviour
     void Start(){
         CheckSerializedReferences();
 
+        ResetGame();
+        mainCamera = Camera.main;
+
         boardSize = settings.GetBoardSize();
         cellSize = settings.GetCellSize();
-        disks = new Disk[boardSize,boardSize];
-        board = new Board(boardSize);
-        mainCamera = Camera.main;
 
         disksParent = new GameObject("Disks");
         disksParent.transform.SetParent(transform);
@@ -58,6 +66,7 @@ public class Gameboard : MonoBehaviour
 
         uiController = UIController.Instance;
 
+        ResetGame();
         PlaceInitialDisks();
     }
 
@@ -82,6 +91,11 @@ public class Gameboard : MonoBehaviour
     }
 
     private void NextPlayer(){
+        if(turnsWithoutLegalMove == 2){
+            OnGameEnd();
+            return;
+        }
+            
         UpdateScoreText();
         currentPlayer = !currentPlayer;
         
@@ -97,9 +111,53 @@ public class Gameboard : MonoBehaviour
     }
 
     private void OnPlayerTurnStart(){
-        PlaceHelpTexts(board.GetLegalMoves(currentPlayer));
+        List<Move> legalMoves = board.GetLegalMoves(currentPlayer);
+        if(legalMoves.Count == 0){      //No moves are available. Next players turn.
+            turnsWithoutLegalMove++;
+            NextPlayer();
+        }
+
+        turnsWithoutLegalMove = 0;
+        PlaceHelpTexts(legalMoves);
         placementIndicator.SetActive(true);
         isPlayersTurn = true;
+    }
+
+    private void OnGameEnd(){
+        int white, black;
+        board.GetScore(out white, out black);
+        
+        if(white < black){
+            uiController.DisplayEndScreen(blackWinningText);
+            blackWins++;
+        }
+
+        if(white > black){
+            uiController.DisplayEndScreen(whiteWinningText);
+            whiteWins++;
+        }
+
+        if(white == black)
+            uiController.DisplayEndScreen(tieWinningText);
+    }
+
+    public void StartNewGame(){
+        ResetGame();
+        PlaceInitialDisks();
+    }
+
+    private void ResetGame(){
+        if(disks != null){
+            for (int y = 0; y < disks.GetLength(0); y++){
+                for (int x = 0; x < disks.GetLength(1); x++){
+                    if(disks[x,y] != null)
+                        Destroy(disks[x,y].gameObject);
+                }
+            }
+        }
+        turnsWithoutLegalMove = 0;
+        disks = new Disk[boardSize,boardSize];
+        board = new Board(boardSize);
     }
 
     private void OnPlayerTurnEnd(){
@@ -119,13 +177,17 @@ public class Gameboard : MonoBehaviour
     }
 
     private IEnumerator PlayAsOpponent(BaseOpponent opponent){
-        yield return new WaitForSeconds(1.0f);
         Move move;
 
-        if(opponent.GetMove(this.board, out move))    //Only place move if possible.
+        if(opponent.GetMove(this.board, out move)){     //Only place move if possible.
+            yield return new WaitForSeconds(aiTimeBetweenTurns);      //But wait one second first.
             TryPlaceDisk(move.position, currentPlayer, out move);
+            turnsWithoutLegalMove = 0;
+            yield return new WaitForSeconds(aiTimeBetweenTurns);
+        }
+        else
+            turnsWithoutLegalMove++;
 
-        yield return new WaitForSeconds(1.0f);
         NextPlayer();
     }
 

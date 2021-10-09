@@ -13,7 +13,13 @@ public class UIController : MonoBehaviour {
     private bool sidepanelActive = true;
     Vector3 defaultPosition;
 
+    [SerializeField] private GameObject winningScreen;
+    [SerializeField] private TextMeshProUGUI winningScreenText;
+
     [SerializeField] private MonoBehaviour[] disableOnSidepanel;
+    
+
+    private Gameboard board;
     
     private static UIController _instance;
     public static UIController Instance { get { return _instance; } }
@@ -27,7 +33,9 @@ public class UIController : MonoBehaviour {
 
     private void Start(){
         defaultPosition = sidepanel.GetComponent<RectTransform>().localPosition;
+        board = FindObjectOfType<Gameboard>();
         SetSidePanel(false);
+        winningScreen.SetActive(false);
     }
 
     private void SetSidePanel(bool active){
@@ -68,5 +76,16 @@ public class UIController : MonoBehaviour {
             blackScoreText.text = newScore.ToString();
         else
             whiteScoreText.text = newScore.ToString();
+    }
+
+    public void DisplayEndScreen(string displayText){
+        SetSidePanel(false);
+        winningScreenText.text = displayText;
+        winningScreen.SetActive(true);
+    }
+
+    public void StartNewGame(){
+        winningScreen.SetActive(false);
+        board.StartNewGame();
     }
 }
