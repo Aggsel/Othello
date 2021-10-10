@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class UIController : MonoBehaviour {
 
@@ -18,6 +19,8 @@ public class UIController : MonoBehaviour {
 
     [SerializeField] private MonoBehaviour[] disableOnSidepanel;
     
+    [SerializeField] private GameSettings settings;
+    [SerializeField] private Toggle disableWinnerPromptToggle;
 
     private Gameboard board;
     
@@ -36,6 +39,12 @@ public class UIController : MonoBehaviour {
         board = FindObjectOfType<Gameboard>();
         SetSidePanel(false);
         winningScreen.SetActive(false);
+
+        disableWinnerPromptToggle.isOn = settings.disableWinnerPrompt;
+    }
+
+    public void OnWinnerPromptToggle(){
+        settings.StartNewGameWithoutPrompt(disableWinnerPromptToggle.isOn);
     }
 
     private void SetSidePanel(bool active){

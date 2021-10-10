@@ -8,6 +8,8 @@ public class GameSettings: ScriptableObject
 {
     [SerializeField] private int boardSize;
     [SerializeField] private float cellSize;
+    [SerializeField] private float gameSpeed = 1.0f;
+    [SerializeField] public bool disableWinnerPrompt = false;
 
     public int GetBoardSize(){
         return this.boardSize;
@@ -16,4 +18,17 @@ public class GameSettings: ScriptableObject
     public float GetCellSize(){
         return cellSize;
     }
+
+    public float GetGameSpeed(){
+        return gameSpeed;
+    }
+
+    public void SetGameSpeed(float newSpeed){
+        this.gameSpeed = newSpeed;
+    }
+
+    public void StartNewGameWithoutPrompt(bool value){
+        disableWinnerPrompt = value;
+    }
+
 }

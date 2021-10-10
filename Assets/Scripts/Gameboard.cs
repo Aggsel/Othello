@@ -127,6 +127,11 @@ public class Gameboard : MonoBehaviour
         int white, black;
         board.GetScore(out white, out black);
         
+        if(settings.disableWinnerPrompt){
+            StartNewGame();
+            return;
+        }
+
         if(white < black){
             uiController.DisplayEndScreen(blackWinningText);
             blackWins++;
@@ -178,12 +183,12 @@ public class Gameboard : MonoBehaviour
 
     private IEnumerator PlayAsOpponent(BaseOpponent opponent){
         Move move;
-
+        float gameSpeed = settings.GetGameSpeed(); 
         if(opponent.GetMove(this.board, out move)){     //Only place move if possible.
-            yield return new WaitForSeconds(aiTimeBetweenTurns);      //But wait one second first.
+            yield return new WaitForSeconds(aiTimeBetweenTurns / gameSpeed);      //But wait one second first.
             TryPlaceDisk(move.position, currentPlayer, out move);
             turnsWithoutLegalMove = 0;
-            yield return new WaitForSeconds(aiTimeBetweenTurns);
+            yield return new WaitForSeconds(aiTimeBetweenTurns / gameSpeed);
         }
         else
             turnsWithoutLegalMove++;

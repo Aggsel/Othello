@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardSize: 8
   cellSize: 2
+  gameSpeed: 100
+  startNewGameWithoutPrompt: 0
