@@ -10,6 +10,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d19d13560e2e3b146958265bb4996503, type: 3}
-  m_Name: Minimax Depth3
+  m_Name: B_Minimax
   m_EditorClassIdentifier: 
   searchDepth: 3

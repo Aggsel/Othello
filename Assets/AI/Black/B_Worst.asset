@@ -9,6 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18ebd8a0c10530d429bb37e8c4e3ca31, type: 3}
-  m_Name: RandomMove
+  m_Script: {fileID: 11500000, guid: 12b814bacc0aed347927a4e065852ece, type: 3}
+  m_Name: B_Worst
   m_EditorClassIdentifier: 

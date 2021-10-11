@@ -91,6 +91,24 @@ public class Gameboard : MonoBehaviour
         }
     }
 
+    public void SetWhiteOpponent(BaseOpponent opponent){
+        this.opponentWhite = opponent;
+        this.opponentWhite.SetColor(false);
+    }
+
+    public void ClearWhiteOpponent(){
+        this.opponentWhite = null;
+    }
+
+    public void ClearBlackOpponent(){
+        this.opponentBlack = null;
+    }
+
+    public void SetBlackOpponent(BaseOpponent opponent){
+        this.opponentBlack = opponent;
+        this.opponentBlack.SetColor(true);
+    }
+
     private void NextPlayer(){
         if(turnsWithoutLegalMove == 2){
             OnGameEnd();

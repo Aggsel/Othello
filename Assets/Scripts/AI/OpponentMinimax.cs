@@ -27,8 +27,8 @@ public class OpponentMinimax : BaseOpponent
         }
 
         int search = Search(board, searchDepth, this.color);
-        Debug.Log(@$"Current best move: {currentBestMove.position}. Best move flips: {currentBestMove.flips.Count}
-                    Best move without search: {legalMoves[maxFlipsIndex].position}. Flips: {maxFlips}");
+        // Debug.Log(@$"Current best move: {currentBestMove.position}. Best move flips: {currentBestMove.flips.Count}
+        //             Best move without search: {legalMoves[maxFlipsIndex].position}. Flips: {maxFlips}");
 
         move = currentBestMove;
         return true;
@@ -68,10 +68,10 @@ public class OpponentMinimax : BaseOpponent
         if(depth == searchDepth && maximizingPlayer == this.color)
             this.currentBestMove = bestCurrentMove;
 
-        if(maximizingPlayer == this.color)
-            Debug.Log($"Best move depth {depth}, Pos: {bestCurrentMove.position}, Flips {bestCurrentMove.flips.Count}");
-        else
-            Debug.Log($"Best move depth {depth}, Pos: {bestCurrentMove.position}, Flips -{bestCurrentMove.flips.Count}");
+        // if(maximizingPlayer == this.color)
+        //     Debug.Log($"Best move depth {depth}, Pos: {bestCurrentMove.position}, Flips {bestCurrentMove.flips.Count}");
+        // else
+        //     Debug.Log($"Best move depth {depth}, Pos: {bestCurrentMove.position}, Flips -{bestCurrentMove.flips.Count}");
         return bestMove;
     }
 }

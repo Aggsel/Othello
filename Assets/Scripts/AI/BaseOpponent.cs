@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BaseOpponent : ScriptableObject
 {
-    protected bool color = true;
+    [SerializeField] protected bool color = true;
 
     public void SetColor(bool color){
         this.color = color;

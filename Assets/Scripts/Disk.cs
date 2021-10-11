@@ -59,7 +59,7 @@ public class Disk : MonoBehaviour
         float gameSpeed = settings.GetGameSpeed();
         while(flipCounter > 0){
             //Move up
-            float timer = Time.deltaTime;
+            float timer = 0.0f;
             float animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time / gameSpeed;
             Vector3 flipPosition = targetBoardPlacement + placementOffset;
             while(timer < animationDuration){
@@ -72,7 +72,7 @@ public class Disk : MonoBehaviour
 
             //Flip
             float startRotationAngle = transform.localEulerAngles.y;
-            timer = Time.deltaTime;
+            timer = 0.0f;
             animationDuration = flipAnimation.keys[flipAnimation.keys.Length-1].time / gameSpeed;
             while(timer < animationDuration){
                 float t = timer/animationDuration;
@@ -82,7 +82,7 @@ public class Disk : MonoBehaviour
             }
 
             //Move down
-            timer = Time.deltaTime;
+            timer = 0.0f;
             animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time / gameSpeed;
             while(timer < animationDuration){
                 float t = timer/animationDuration;
@@ -100,7 +100,7 @@ public class Disk : MonoBehaviour
     }
 
     private IEnumerator PlaceAnimation(){
-        float timer = Time.deltaTime;
+        float timer = 0.0f;
         float gameSpeed = settings.GetGameSpeed();
         float animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time / gameSpeed;
         Vector3 sourcePosition = transform.position;
@@ -111,5 +111,7 @@ public class Disk : MonoBehaviour
             timer += Time.deltaTime;
             yield return null;
         }
+        RotateToCorrectSide();
+        transform.position = targetBoardPlacement;
     }
 }

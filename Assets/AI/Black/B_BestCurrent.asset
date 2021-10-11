@@ -10,5 +10,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf6ed1d01542a2047a907a446dab3c7f, type: 3}
-  m_Name: 2BestCurrentMove
+  m_Name: B_BestCurrent
   m_EditorClassIdentifier: 
+  color: 0

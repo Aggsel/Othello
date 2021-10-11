@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d19d13560e2e3b146958265bb4996503, type: 3}
-  m_Name: Minimax Depth1
+  m_Script: {fileID: 11500000, guid: 18ebd8a0c10530d429bb37e8c4e3ca31, type: 3}
+  m_Name: W_Random
   m_EditorClassIdentifier: 
-  searchDepth: 1
+  color: 0
