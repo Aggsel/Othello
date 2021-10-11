@@ -9,11 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6a158c48b0a2394dad6d44234a3b191, type: 3}
-  m_Name: GameSettings
+  m_Script: {fileID: 11500000, guid: d19d13560e2e3b146958265bb4996503, type: 3}
+  m_Name: Minimax Depth3
   m_EditorClassIdentifier: 
-  boardSize: 8
-  cellSize: 2
-  gameSpeed: 1
-  disableWinnerPrompt: 1
-  displayFlipsBeforeMove: 1
+  searchDepth: 3

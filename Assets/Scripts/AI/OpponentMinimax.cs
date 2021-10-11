@@ -7,7 +7,7 @@ using UnityEngine.Events;
 public class OpponentMinimax : BaseOpponent
 {
     private Move currentBestMove;
-    private int searchDepth = 1;
+    [SerializeField] private int searchDepth = 5;
 
     public override bool GetMove(Board board, out Move move){
         List<Move> legalMoves = board.GetLegalMoves(this.color);
@@ -17,27 +17,24 @@ public class OpponentMinimax : BaseOpponent
         if(legalMoves.Count == 0)
             return false;
 
-
-        int maxFlips = -100;
-        int maxFlipsIndex = -100;
-        for (int i = 0; i < legalMoves.Count; i++){
+        int maxFlips = legalMoves[0].flips.Count;
+        int maxFlipsIndex = 0;
+        for (int i = 1; i < legalMoves.Count; i++){
             if(legalMoves[i].flips.Count > maxFlips){
                 maxFlips = legalMoves[i].flips.Count;
                 maxFlipsIndex = i;
             }
         }
 
-        int search = Search(board, searchDepth, true);
-        Debug.Log($"Search finished, a score of {search} was found.");
-        Debug.Log($"Current best move: {currentBestMove.position}. Best move flips: {currentBestMove.flips.Count}");
-        Debug.Log($"Best move without search: {legalMoves[maxFlipsIndex].position}. Flips: {maxFlips}");
+        int search = Search(board, searchDepth, this.color);
+        Debug.Log(@$"Current best move: {currentBestMove.position}. Best move flips: {currentBestMove.flips.Count}
+                    Best move without search: {legalMoves[maxFlipsIndex].position}. Flips: {maxFlips}");
 
         move = currentBestMove;
         return true;
     }
 
     private int Search(Board board, int depth, bool maximizingPlayer){
-        // Debug.Log($"Searching... Depth: {depth}");
         List<Move> legalMoves = board.GetLegalMoves(maximizingPlayer);
 
         if(depth == 0 || legalMoves.Count == 0){
@@ -50,38 +47,31 @@ public class OpponentMinimax : BaseOpponent
 
         Board newBoard = new Board(board.boardSize, board.board);
         
-        int bestMove = maximizingPlayer ? int.MinValue : int.MaxValue;
+        int bestMove = maximizingPlayer == this.color ? int.MinValue : int.MaxValue;
         Move bestCurrentMove = new Move();
         for (int i = 0; i < legalMoves.Count; i++){
             Move move = legalMoves[i];
 
             newBoard.TryPlaceDisk(move.position, maximizingPlayer, ref move);
-            // if(!newBoard.TryPlaceDisk(move.position, maximizingPlayer, ref move))
-            //     Debug.Log($"Invalid move. {i}/{legalMoves.Count-1}.");
-            // else
-            //     Debug.Log($"Move was legal. {i}/{legalMoves.Count-1}");
             int moveValue = Search(newBoard, depth-1, !maximizingPlayer);
             newBoard.UndoMove(move);
 
-            if(maximizingPlayer){
+            if(maximizingPlayer == this.color)
                 bestMove = Mathf.Max(moveValue, bestMove);
-                if(moveValue == bestMove){
-                    bestCurrentMove = legalMoves[i];
-                    // Debug.Log($"Changing best move in depth {depth}");
-                }
-            }
-            else{
+            else
                 bestMove = Mathf.Min(moveValue, bestMove);
-                if(moveValue == bestMove){
-                    bestCurrentMove = legalMoves[i];
-                    // Debug.Log($"Changing best move in depth {depth}");
-                }
-            }
+
+            if(moveValue == bestMove)
+                bestCurrentMove = legalMoves[i];
         }
 
-        if(depth == searchDepth)
+        if(depth == searchDepth && maximizingPlayer == this.color)
             this.currentBestMove = bestCurrentMove;
 
+        if(maximizingPlayer == this.color)
+            Debug.Log($"Best move depth {depth}, Pos: {bestCurrentMove.position}, Flips {bestCurrentMove.flips.Count}");
+        else
+            Debug.Log($"Best move depth {depth}, Pos: {bestCurrentMove.position}, Flips -{bestCurrentMove.flips.Count}");
         return bestMove;
     }
 }

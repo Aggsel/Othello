@@ -21,6 +21,7 @@ public class UIController : MonoBehaviour {
     
     [SerializeField] private GameSettings settings;
     [SerializeField] private Toggle disableWinnerPromptToggle;
+    [SerializeField] private Toggle disableHelpTextToggle;
 
     private Gameboard board;
     
@@ -41,10 +42,15 @@ public class UIController : MonoBehaviour {
         winningScreen.SetActive(false);
 
         disableWinnerPromptToggle.isOn = settings.disableWinnerPrompt;
+        disableHelpTextToggle.isOn = settings.displayHelpTexts;
     }
 
     public void OnWinnerPromptToggle(){
         settings.StartNewGameWithoutPrompt(disableWinnerPromptToggle.isOn);
+    }
+
+    public void OnHelpTextToggle(){
+        settings.SetHelpText(disableHelpTextToggle.isOn);
     }
 
     private void SetSidePanel(bool active){

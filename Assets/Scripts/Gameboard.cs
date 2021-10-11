@@ -24,8 +24,8 @@ public class Gameboard : MonoBehaviour
     private UIController uiController;
     private int turnsWithoutLegalMove = 0;
 
-    private int whiteWins = 0;
-    private int blackWins = 0;
+    [SerializeField] private int whiteWins = 0;
+    [SerializeField] private int blackWins = 0;
 
     [Header("Game Settings")]
     [SerializeField] private DiscPosition[] initialPositions;
@@ -36,8 +36,8 @@ public class Gameboard : MonoBehaviour
     [SerializeField] private string tieWinningText;
 
     [Header("Opponent AI References")]
-    [SerializeField] private BaseOpponent mainOpponent;
-    [SerializeField] private BaseOpponent secondaryOpponent;
+    [SerializeField] private BaseOpponent opponentBlack;
+    [SerializeField] private BaseOpponent opponentWhite;
 
     [Header("Game Object References")]
     [SerializeField] private Transform blackSpawnPoint;
@@ -52,8 +52,6 @@ public class Gameboard : MonoBehaviour
 
     void Start(){
         CheckSerializedReferences();
-
-        ResetGame();
         mainCamera = Camera.main;
 
         boardSize = settings.GetBoardSize();
@@ -66,15 +64,18 @@ public class Gameboard : MonoBehaviour
 
         uiController = UIController.Instance;
 
+        blackWins = 0;
+        whiteWins = 0;
+        
         ResetGame();
         PlaceInitialDisks();
     }
 
     void OnValidate(){
-        if(mainOpponent != null)
-            mainOpponent.SetColor(true);
-        if(secondaryOpponent != null)
-            secondaryOpponent.SetColor(false);
+        if(opponentBlack != null)
+            opponentBlack.SetColor(true);
+        if(opponentWhite != null)
+            opponentWhite.SetColor(false);
     }
 
     void Update() {
@@ -104,10 +105,10 @@ public class Gameboard : MonoBehaviour
             return;
         }
 
-        if(currentPlayer && mainOpponent != null)
-            StartCoroutine(PlayAsOpponent(mainOpponent));
+        if(currentPlayer && opponentBlack != null)
+            StartCoroutine(PlayAsOpponent(opponentBlack));
         else
-            StartCoroutine(PlayAsOpponent(secondaryOpponent));
+            StartCoroutine(PlayAsOpponent(opponentWhite));
     }
 
     private void OnPlayerTurnStart(){
@@ -118,7 +119,8 @@ public class Gameboard : MonoBehaviour
         }
 
         turnsWithoutLegalMove = 0;
-        PlaceHelpTexts(legalMoves);
+        if(settings.displayHelpTexts)
+            PlaceHelpTexts(legalMoves);
         placementIndicator.SetActive(true);
         isPlayersTurn = true;
     }
@@ -164,6 +166,7 @@ public class Gameboard : MonoBehaviour
         turnsWithoutLegalMove = 0;
         disks = new Disk[boardSize,boardSize];
         board = new Board(boardSize);
+        currentPlayer = true;
     }
 
     private void OnPlayerTurnEnd(){
@@ -175,9 +178,9 @@ public class Gameboard : MonoBehaviour
     private bool IsPlayersTurn(){
         if(isPlayersTurn)
             return true;
-        if(currentPlayer && mainOpponent == null)
+        if(currentPlayer && opponentBlack == null)
             return true;
-        if(!currentPlayer && secondaryOpponent == null)
+        if(!currentPlayer && opponentWhite == null)
             return true;
         return false;
     }
@@ -222,9 +225,9 @@ public class Gameboard : MonoBehaviour
             whiteSpawnPoint = new GameObject("White Spawn Point").transform;
         }
 
-        if(mainOpponent == null){
-            Debug.LogError("No opponent was attached to the gameboard, aborting.", this);
-        }
+        // if(opponentBlack == null){
+        //     Debug.LogError("No opponent was attached to the gameboard, aborting.", this);
+        // }
 
         //If a critical field was not referenced, disable the component.
         if(!isValid)
