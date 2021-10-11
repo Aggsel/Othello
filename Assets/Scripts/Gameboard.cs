@@ -81,8 +81,8 @@ public class Gameboard : MonoBehaviour
         Vector2Int index;
         if(Input.GetMouseButtonDown(0) && IsPlayersTurn()){
             if(GetBoardIndexFromMousePosition(out index)){
-                Move move;
-                if(TryPlaceDisk(index, currentPlayer, out move)){
+                Move move = new Move();
+                if(TryPlaceDisk(index, currentPlayer, ref move)){
                     OnPlayerTurnEnd();
                     NextPlayer();
                 }
@@ -127,20 +127,21 @@ public class Gameboard : MonoBehaviour
         int white, black;
         board.GetScore(out white, out black);
         
+        if(white < black)
+            blackWins++;
+        if(white > black)
+            whiteWins++;
+
         if(settings.disableWinnerPrompt){
             StartNewGame();
             return;
         }
 
-        if(white < black){
+        if(white < black)
             uiController.DisplayEndScreen(blackWinningText);
-            blackWins++;
-        }
 
-        if(white > black){
+        if(white > black)
             uiController.DisplayEndScreen(whiteWinningText);
-            whiteWins++;
-        }
 
         if(white == black)
             uiController.DisplayEndScreen(tieWinningText);
@@ -186,7 +187,7 @@ public class Gameboard : MonoBehaviour
         float gameSpeed = settings.GetGameSpeed(); 
         if(opponent.GetMove(this.board, out move)){     //Only place move if possible.
             yield return new WaitForSeconds(aiTimeBetweenTurns / gameSpeed);      //But wait one second first.
-            TryPlaceDisk(move.position, currentPlayer, out move);
+            TryPlaceDisk(move.position, currentPlayer, ref move);
             turnsWithoutLegalMove = 0;
             yield return new WaitForSeconds(aiTimeBetweenTurns / gameSpeed);
         }
@@ -232,8 +233,8 @@ public class Gameboard : MonoBehaviour
 
     private void PlaceInitialDisks(){
         for (int i = 0; i < initialPositions.Length; i++){
-            Move move;
-            TryPlaceDisk(initialPositions[i].position, initialPositions[i].color, out move, true);
+            Move move = new Move();
+            TryPlaceDisk(initialPositions[i].position, initialPositions[i].color, ref move, true);
         }
         NextPlayer();
     }
@@ -264,8 +265,8 @@ public class Gameboard : MonoBehaviour
     /// <param name="color">What color the new disk should be. True = black, False = white</param>
     /// <param name="force">Should this disk be placed regardless of the rules?</param>
     /// <returns>True if the new disk was successfully placed.</returns>
-    private bool TryPlaceDisk(Vector2Int position, bool color, out Move move, bool force = false){
-        if(!board.TryPlaceDisk(position, color, out move, force))
+    private bool TryPlaceDisk(Vector2Int position, bool color, ref Move move, bool force = false){
+        if(!board.TryPlaceDisk(position, color, ref move, force))
             return false;
 
         Vector3 spawnPoint = color ? blackSpawnPoint.position : whiteSpawnPoint.position;

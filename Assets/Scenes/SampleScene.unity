@@ -11109,8 +11109,8 @@ MonoBehaviour:
   whiteWinningText: White wins!
   blackWinningText: Black wins!
   tieWinningText: It's a tie!
-  mainOpponent: {fileID: 11400000, guid: e5e2b3d52bb4ae44c95e6a8eca8579a6, type: 2}
-  secondaryOpponent: {fileID: 11400000, guid: 6d034b7eb0b79964c8fb96f18b896ed1, type: 2}
+  mainOpponent: {fileID: 11400000, guid: 7c74a736d8d349e46940ddbbca5647d8, type: 2}
+  secondaryOpponent: {fileID: 11400000, guid: e5e2b3d52bb4ae44c95e6a8eca8579a6, type: 2}
   blackSpawnPoint: {fileID: 2103464072}
   whiteSpawnPoint: {fileID: 324710860}
   placementIndicator: {fileID: 6448380378338963101}

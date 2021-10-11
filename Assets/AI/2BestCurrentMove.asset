@@ -9,10 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6a158c48b0a2394dad6d44234a3b191, type: 3}
-  m_Name: GameSettings
+  m_Script: {fileID: 11500000, guid: bf6ed1d01542a2047a907a446dab3c7f, type: 3}
+  m_Name: 2BestCurrentMove
   m_EditorClassIdentifier: 
-  boardSize: 8
-  cellSize: 2
-  gameSpeed: 100
-  disableWinnerPrompt: 1

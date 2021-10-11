@@ -26,8 +26,8 @@ public struct Move{
 }
 
 public class Board{
-    private DiskStruct[,] board;
-    private int boardSize;
+    public DiskStruct[,] board;
+    public int boardSize;
 
     private readonly Vector2Int[] directions = new Vector2Int[]{
         new Vector2Int(0, 1),
@@ -41,8 +41,14 @@ public class Board{
     };
 
     public Board(int size, DiskStruct[,] configuration = null){
-        if(configuration != null)
-            this.board = configuration;
+        if(configuration != null){
+            this.board = new DiskStruct[size,size];
+            for (int y = 0; y < configuration.GetLength(0); y++){
+                for (int x = 0; x < configuration.GetLength(0); x++){
+                    this.board[x,y] = configuration[x,y];
+                }
+            }
+        }
         else
             this.board = new DiskStruct[size,size];
         this.boardSize = size;
@@ -63,8 +69,16 @@ public class Board{
         }
     }
 
-    public bool TryPlaceDisk(Vector2Int position, bool color, out Move move, bool force = false){
-        move = new Move();
+    public void UndoMove(Move move){
+        TryFlipDisk(move.position);
+
+        for (int i = 0; i < move.flips.Count; i++){
+            TryFlipDisk(move.flips[i]);
+        }
+    }
+
+    public bool TryPlaceDisk(Vector2Int position, bool color, ref Move move, bool force = false){
+        // move = new Move();
         if(!IsWithinBoard(position))
             return false;
         if(this.board[position.x, position.y].isPlaced)
@@ -120,8 +134,8 @@ public class Board{
         Move bestMove = new Move();
         for (int i = 0; i < legalMoves.Count; i++){
             Board newBoard = new Board(this.boardSize, this.board);
-            Move move;
-            if(newBoard.TryPlaceDisk(legalMoves[i].position, color, out move)){
+            Move move = new Move();
+            if(newBoard.TryPlaceDisk(legalMoves[i].position, color, ref move)){
                 if(move.flips.Count > bestMove.flips.Count){
                     bestMove = move;
                     newBoard.Search(move.position, !color, maxDepth, currentDepth + 1);
