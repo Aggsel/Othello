@@ -152,6 +152,8 @@ public class Gameboard : MonoBehaviour
         if(white > black)
             whiteWins++;
 
+        uiController.UpdateDistribution(whiteWins, blackWins);
+
         if(settings.disableWinnerPrompt){
             StartNewGame();
             return;

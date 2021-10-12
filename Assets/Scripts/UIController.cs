@@ -8,6 +8,7 @@ public class UIController : MonoBehaviour {
 
     [SerializeField] private TextMeshPro whiteScoreText;
     [SerializeField] private TextMeshPro blackScoreText;
+    [SerializeField] private TextMeshPro distributionText;
 
     [SerializeField] private GameObject sidepanel;
     [SerializeField] private GameObject sidepanelArrowButton;
@@ -49,6 +50,11 @@ public class UIController : MonoBehaviour {
         settings.StartNewGameWithoutPrompt(disableWinnerPromptToggle.isOn);
     }
 
+    public void SetWinnerPrompt(bool value){
+        disableWinnerPromptToggle.isOn = value;
+        OnWinnerPromptToggle();
+    }
+
     public void OnHelpTextToggle(){
         settings.SetHelpText(disableHelpTextToggle.isOn);
     }
@@ -75,6 +81,12 @@ public class UIController : MonoBehaviour {
             disableOnSidepanel[i].enabled = active;
         }
     }
+
+    public void UpdateDistribution(int whiteWins, int blackWins){
+        int total = whiteWins + blackWins;
+        distributionText.text = $"{(blackWins/(float)(total) * 100).ToString("0.0")}%\n{(whiteWins/(float)(total) * 100).ToString("0.0")}%";
+    }
+
 
     public void SetScore(bool color, int newScore){
         if(blackScoreText == null){

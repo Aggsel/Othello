@@ -26,24 +26,24 @@ public class OpponentMinimax : BaseOpponent
             }
         }
 
-        int search = Search(board, searchDepth, this.color);
-        // Debug.Log(@$"Current best move: {currentBestMove.position}. Best move flips: {currentBestMove.flips.Count}
-        //             Best move without search: {legalMoves[maxFlipsIndex].position}. Flips: {maxFlips}");
+        int search = Search(board, searchDepth, int.MinValue, int.MaxValue, this.color);
 
         move = currentBestMove;
         return true;
     }
 
-    private int Search(Board board, int depth, bool maximizingPlayer){
+    protected virtual int Heuristic(Board board, bool player){
+        int white, black;
+        board.GetScore(out white, out black);
+        int score = player ? black - white : white - black;
+        return score;
+    }
+
+    private int Search(Board board, int depth, int alpha, int beta, bool maximizingPlayer){
         List<Move> legalMoves = board.GetLegalMoves(maximizingPlayer);
 
-        if(depth == 0 || legalMoves.Count == 0){
-            int white, black;
-            board.GetScore(out white, out black);
-            int score = maximizingPlayer ? black - white : white - black;
-            // Debug.Log($"Getting score {score}."); // Black: {black} White: {white}. Reason: depth = {depth}, legalMoves = {legalMoves.Count}");
-            return score;
-        }
+        if(depth == 0 || legalMoves.Count == 0)
+            return Heuristic(board, maximizingPlayer);
 
         Board newBoard = new Board(board.boardSize, board.board);
         
@@ -53,13 +53,21 @@ public class OpponentMinimax : BaseOpponent
             Move move = legalMoves[i];
 
             newBoard.TryPlaceDisk(move.position, maximizingPlayer, ref move);
-            int moveValue = Search(newBoard, depth-1, !maximizingPlayer);
+            int moveValue = Search(newBoard, depth-1, alpha, beta, !maximizingPlayer);
             newBoard.UndoMove(move);
 
-            if(maximizingPlayer == this.color)
+            if(maximizingPlayer == this.color){
                 bestMove = Mathf.Max(moveValue, bestMove);
-            else
+                if(bestMove >= beta)
+                    break;
+                alpha = Mathf.Max(alpha, bestMove);
+            }
+            else{
                 bestMove = Mathf.Min(moveValue, bestMove);
+                if(bestMove <= alpha)
+                    break;
+                beta = Mathf.Min(beta, bestMove);
+            }
 
             if(moveValue == bestMove)
                 bestCurrentMove = legalMoves[i];
@@ -67,11 +75,6 @@ public class OpponentMinimax : BaseOpponent
 
         if(depth == searchDepth && maximizingPlayer == this.color)
             this.currentBestMove = bestCurrentMove;
-
-        // if(maximizingPlayer == this.color)
-        //     Debug.Log($"Best move depth {depth}, Pos: {bestCurrentMove.position}, Flips {bestCurrentMove.flips.Count}");
-        // else
-        //     Debug.Log($"Best move depth {depth}, Pos: {bestCurrentMove.position}, Flips -{bestCurrentMove.flips.Count}");
         return bestMove;
     }
 }
