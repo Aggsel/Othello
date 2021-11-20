@@ -1,0 +1,20 @@
+name: Build
+on:
+  workflow_dispatch: {}
+jobs:
+  activation:
+    name: Build Windows
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Windows
+        uses: game-ci/unity-builder@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          targetPlatform: StandaloneWindows64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Build
+          path: build
