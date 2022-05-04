@@ -49,6 +49,7 @@ public class Gameboard : MonoBehaviour
     [Header("Asset References")]
     [SerializeField] private GameObject boardTextPrefab;
     [SerializeField] private GameObject diskPrefab;
+    List<Move> legalMoves;
 
     void Start(){
         CheckSerializedReferences();
@@ -130,15 +131,17 @@ public class Gameboard : MonoBehaviour
     }
 
     private void OnPlayerTurnStart(){
-        List<Move> legalMoves = board.GetLegalMoves(currentPlayer);
+        legalMoves = board.GetLegalMoves(currentPlayer);
         if(legalMoves.Count == 0){      //No moves are available. Next players turn.
             turnsWithoutLegalMove++;
             NextPlayer();
         }
 
         turnsWithoutLegalMove = 0;
-        if(settings.displayHelpTexts)
+        if(settings.displayHelpTexts){
+            ClearHelpTexts();
             PlaceHelpTexts(legalMoves);
+        }
         placementIndicator.SetActive(true);
         isPlayersTurn = true;
     }
@@ -314,6 +317,13 @@ public class Gameboard : MonoBehaviour
                 helpTexts.Add(newText);
             }
         }
+    }
+
+    public void SetHelpText(bool visible){
+        if(visible)
+            PlaceHelpTexts(legalMoves);
+        else
+            ClearHelpTexts();
     }
 
     private void ClearHelpTexts(){

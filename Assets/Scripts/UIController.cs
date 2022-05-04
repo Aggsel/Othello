@@ -57,6 +57,7 @@ public class UIController : MonoBehaviour {
 
     public void OnHelpTextToggle(){
         settings.SetHelpText(disableHelpTextToggle.isOn);
+        board.SetHelpText(settings.displayHelpTexts);
     }
 
     private void SetSidePanel(bool active){

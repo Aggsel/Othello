@@ -10,6 +10,12 @@ public class Disk : MonoBehaviour
     [SerializeField] private float verticalPlacementOffset;
     private Vector3 placementOffset;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource placementAudio;
+    [SerializeField] private float randomizePlacementAudio = 0.3f;
+    [SerializeField] private float placementAudioDelay = 0.0f;
+    [SerializeField] private AudioClip[] audioClips;
+
     //true = black, false = white
     private bool color = true;
 
@@ -18,6 +24,10 @@ public class Disk : MonoBehaviour
     private bool animationIsPlaying = false;
 
     private Vector3 targetBoardPlacement;
+
+    void Awake(){
+        placementAudio = placementAudio != null ? placementAudio : GetComponent<AudioSource>();
+    }
 
     void Start(){
         placementOffset = new Vector3(0, verticalPlacementOffset, 0);
@@ -52,6 +62,14 @@ public class Disk : MonoBehaviour
 
     public bool GetColor(){
         return color;
+    }
+
+    private void PlayPlacementAudio(float delay = 0.0f){
+        if(audioClips.Length == 0)
+            return;
+        placementAudio.clip = audioClips[Random.Range(0,audioClips.Length)];
+        placementAudio.pitch = 1.0f + (Random.value-0.5f) * randomizePlacementAudio;
+        placementAudio.PlayDelayed(delay);
     }
 
     private IEnumerator FlipAnimation(){
@@ -104,6 +122,7 @@ public class Disk : MonoBehaviour
         float gameSpeed = settings.GetGameSpeed();
         float animationDuration = placementAnimation.keys[placementAnimation.keys.Length-1].time / gameSpeed;
         Vector3 sourcePosition = transform.position;
+        PlayPlacementAudio(placementAudioDelay);
         while(timer < animationDuration){
             float t = timer/animationDuration;
             t = placementAnimation.Evaluate(t);
@@ -111,7 +130,6 @@ public class Disk : MonoBehaviour
             timer += Time.deltaTime;
             yield return null;
         }
-        RotateToCorrectSide();
         transform.position = targetBoardPlacement;
     }
 }

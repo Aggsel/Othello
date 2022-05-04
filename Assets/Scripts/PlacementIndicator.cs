@@ -11,6 +11,7 @@ public class PlacementIndicator : MonoBehaviour
 
     private MeshRenderer meshRenderer;
     private float cellSize;
+    private float offsetY;
 
     void OnDisable(){
         meshRenderer.enabled = false;
@@ -19,12 +20,12 @@ public class PlacementIndicator : MonoBehaviour
     void OnEnable(){
         if(meshRenderer == null)
             meshRenderer = GetComponent<MeshRenderer>();
-            
         meshRenderer.enabled = true;
     }
 
     void Start(){
         gameboard = FindObjectOfType<Gameboard>();
+        offsetY = transform.position.y;
 
         if(gameboard == null){
             Debug.LogError("No gameboard found, why even bother with a placement indicator if no board? Aborting.", this);
@@ -38,7 +39,7 @@ public class PlacementIndicator : MonoBehaviour
         if(gameboard.GetBoardIndexFromMousePosition(out index))
             if(gameboard.IsWithinBoard(index)){
                 meshRenderer.enabled = true;
-                transform.position = new Vector3(index.x, 0, index.y) * cellSize;
+                transform.position = new Vector3(index.x, offsetY, index.y) * cellSize;
             }
             else{
                 meshRenderer.enabled = false;
